@@ -10,6 +10,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.recyclerview.widget.RecyclerView
+import dj.song.mixer.demoapp.adapter.PostAdapter
 import dj.song.mixer.demoapp.factory.PostViewModelFactory
 import dj.song.mixer.demoapp.factory.UsersViewModelFactory
 import dj.song.mixer.demoapp.repository.UsersListRepository
@@ -23,47 +25,55 @@ import kotlinx.coroutines.launch
 class PostViewActivity : AppCompatActivity() {
 
     lateinit var postViewModel: PostViewModel
-
+    lateinit var recPost: RecyclerView
+    lateinit var adapterPost: PostAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.activity_post)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-        val id = intent.getIntExtra("USER_ID",-1)
+        recPost = findViewById<RecyclerView>(R.id.recPosts)
+        adapterPost = PostAdapter()
+        recPost.adapter = adapterPost
+        val id = intent.getIntExtra("USER_ID", -1)
         val api = RetrofitClient.api
         val repository = UsersListRepository(api)
-        val factory = PostViewModelFactory(repository,id)
+        val factory = PostViewModelFactory(repository, id)
 
-        postViewModel = ViewModelProvider(this@PostViewActivity,factory).get(PostViewModel::class.java)
+        postViewModel =
+            ViewModelProvider(this@PostViewActivity, factory).get(PostViewModel::class.java)
         getData()
     }
 
     private fun getData() {
         lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED){
-                postViewModel.uiState.collect { state->
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                postViewModel.uiState.collect { state ->
                     handleUIState(state)
                 }
             }
         }
     }
 
-    private fun handleUIState(state: PostViewState){
-        when(state){
+    private fun handleUIState(state: PostViewState) {
+        when (state) {
             is PostViewState.Loading -> {
-                Log.d("HTTP==","Loading")
+                Log.d("HTTP==", "Loading")
             }
+
             is PostViewState.Success -> {
                 state.userDTOS.toString()
-                Log.d("HTTP==","Success = ${state.userDTOS.toString()}")
+                adapterPost.submitList(state.userDTOS)
+                Log.d("HTTP==", "Success = ${state.userDTOS.toString()}")
             }
+
             is PostViewState.Error -> {
-                Log.d("HTTP==","Error")
+                Log.d("HTTP==", "Error")
             }
         }
     }
