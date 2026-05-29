@@ -1,7 +1,6 @@
-package dj.song.mixer.demoapp
+package dj.song.mixer.demoapp.state
 
 import dj.song.mixer.demoapp.model.DomainUser
-import dj.song.mixer.demoapp.model.UserDTO
 
 sealed class UsersState {
     object Loading : UsersState()

@@ -1,10 +1,7 @@
 package dj.song.mixer.demoapp
 
-import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.widget.Button
-import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -13,16 +10,19 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import dj.song.mixer.demoapp.factory.PostViewModelFactory
 import dj.song.mixer.demoapp.factory.UsersViewModelFactory
 import dj.song.mixer.demoapp.repository.UsersListRepository
 import dj.song.mixer.demoapp.retrofit.RetrofitClient
+import dj.song.mixer.demoapp.state.PostViewState
 import dj.song.mixer.demoapp.state.UsersState
+import dj.song.mixer.demoapp.viewmodel.PostViewModel
 import dj.song.mixer.demoapp.viewmodel.UsersViewModel
 import kotlinx.coroutines.launch
 
-class MainActivity : AppCompatActivity() {
+class PostViewActivity : AppCompatActivity() {
 
-    lateinit var usersViewModel: UsersViewModel
+    lateinit var postViewModel: PostViewModel
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,43 +34,35 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-
+        val id = intent.getIntExtra("USER_ID",-1)
         val api = RetrofitClient.api
         val repository = UsersListRepository(api)
-        val factory = UsersViewModelFactory(repository)
+        val factory = PostViewModelFactory(repository,id)
 
-        usersViewModel = ViewModelProvider(this@MainActivity,factory).get(UsersViewModel::class.java)
+        postViewModel = ViewModelProvider(this@PostViewActivity,factory).get(PostViewModel::class.java)
         getData()
-
-        findViewById<Button>(R.id.btnNext).setOnClickListener {
-            val intent = Intent(this@MainActivity, PostViewActivity::class.java)
-            intent.putExtra("USER_ID",5)
-            startActivity(intent)
-        }
     }
 
     private fun getData() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED){
-                usersViewModel.uiState.collect { state->
+                postViewModel.uiState.collect { state->
                     handleUIState(state)
                 }
             }
         }
     }
 
-    private fun handleUIState(state: UsersState){
+    private fun handleUIState(state: PostViewState){
         when(state){
-            is UsersState.Loading -> {
+            is PostViewState.Loading -> {
                 Log.d("HTTP==","Loading")
             }
-            is UsersState.Success -> {
+            is PostViewState.Success -> {
                 state.userDTOS.toString()
                 Log.d("HTTP==","Success = ${state.userDTOS.toString()}")
-
-                findViewById<TextView>(R.id.txtData).setText(state.userDTOS.get(5).name)
             }
-            is UsersState.Error -> {
+            is PostViewState.Error -> {
                 Log.d("HTTP==","Error")
             }
         }

@@ -4,14 +4,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dj.song.mixer.demoapp.state.UsersState
 import dj.song.mixer.demoapp.repository.UsersListRepository
+import dj.song.mixer.demoapp.state.PostViewState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class UsersViewModel(private val repository: UsersListRepository) : ViewModel() {
+class PostViewModel(private val repository: UsersListRepository, val id: Int) : ViewModel() {
 
-    private val _uiState = MutableStateFlow<UsersState>(UsersState.Loading)
-    val uiState: StateFlow<UsersState> = _uiState
+    private val _uiState = MutableStateFlow<PostViewState>(PostViewState.Loading)
+    val uiState: StateFlow<PostViewState> = _uiState
 
     init {
         fetchUsers()
@@ -19,12 +20,12 @@ class UsersViewModel(private val repository: UsersListRepository) : ViewModel() 
 
     private fun fetchUsers() {
         viewModelScope.launch {
-            _uiState.value = UsersState.Loading
+            _uiState.value = PostViewState.Loading
             try {
-                val users = repository.getAllDomainUsers()
-                _uiState.value = UsersState.Success(users)
+                val users = repository.getUserPost(id)
+                _uiState.value = PostViewState.Success(users)
             } catch (e: Exception) {
-                _uiState.value = UsersState.Error(e.message ?: "Loading Error")
+                _uiState.value = PostViewState.Error(e.message ?: "Loading Error")
             }
         }
     }
