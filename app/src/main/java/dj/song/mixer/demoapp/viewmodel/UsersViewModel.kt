@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class UsersViewModel : ViewModel() {
+class UsersViewModel(private val repository: UsersListRepository) : ViewModel() {
 
     private val _uiState = MutableStateFlow<UsersState>(UsersState.Loading)
     val uiState: StateFlow<UsersState> = _uiState
@@ -21,7 +21,7 @@ class UsersViewModel : ViewModel() {
         viewModelScope.launch {
             _uiState.value = UsersState.Loading
             try {
-                val users = UsersListRepository.getAllDomainUsers()
+                val users = repository.getAllDomainUsers()
                 _uiState.value = UsersState.Success(users)
             } catch (e: Exception) {
                 _uiState.value = UsersState.Error(e.message ?: "Loading Error")

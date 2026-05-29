@@ -10,6 +10,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import dj.song.mixer.demoapp.factory.UsersViewModelFactory
+import dj.song.mixer.demoapp.repository.UsersListRepository
+import dj.song.mixer.demoapp.retrofit.RetrofitClient
 import dj.song.mixer.demoapp.viewmodel.UsersViewModel
 import kotlinx.coroutines.launch
 
@@ -28,7 +31,11 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        usersViewModel = ViewModelProvider(this@MainActivity).get(UsersViewModel::class.java)
+        val api = RetrofitClient.api
+        val repository = UsersListRepository(api)
+        val factory = UsersViewModelFactory(repository)
+
+        usersViewModel = ViewModelProvider(this@MainActivity,factory).get(UsersViewModel::class.java)
         getData()
     }
 
