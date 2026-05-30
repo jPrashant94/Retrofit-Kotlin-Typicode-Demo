@@ -13,6 +13,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import dj.song.mixer.demoapp.adapter.PostAdapter
+import dj.song.mixer.demoapp.adapter.PostAdapterPagination
 import dj.song.mixer.demoapp.factory.PostViewModelFactory
 import dj.song.mixer.demoapp.factory.UsersViewModelFactory
 import dj.song.mixer.demoapp.repository.UsersListRepository
@@ -27,7 +28,7 @@ class PostViewActivity : AppCompatActivity() {
 
     lateinit var postViewModel: PostViewModel
     lateinit var recPost: RecyclerView
-    lateinit var adapterPost: PostAdapter
+    lateinit var adapterPost: PostAdapterPagination
 
     private var isNetworkLoading = false
     var id = 1
@@ -49,7 +50,7 @@ class PostViewActivity : AppCompatActivity() {
         recPost = findViewById<RecyclerView>(R.id.recPosts)
         val layoutManager = LinearLayoutManager(this)
         recPost.layoutManager = layoutManager
-        adapterPost = PostAdapter(onPostClicked = { post ->
+        adapterPost = PostAdapterPagination(onPostClicked = { post ->
 
         })
         recPost.adapter = adapterPost
