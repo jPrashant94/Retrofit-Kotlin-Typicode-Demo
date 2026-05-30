@@ -21,7 +21,6 @@ class PostAdapter(private val onPostClicked : (PostDTO) -> Unit) : ListAdapter<P
             bodyText.text = post.body
         }
 
-
     }
 
     override fun onCreateViewHolder(

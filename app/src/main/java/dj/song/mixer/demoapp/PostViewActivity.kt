@@ -10,6 +10,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import dj.song.mixer.demoapp.adapter.PostAdapter
 import dj.song.mixer.demoapp.factory.PostViewModelFactory
@@ -28,6 +29,8 @@ class PostViewActivity : AppCompatActivity() {
     lateinit var recPost: RecyclerView
     lateinit var adapterPost: PostAdapter
 
+    private var isNetworkLoading = false
+    var id = 1
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -37,16 +40,45 @@ class PostViewActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+        setupRecyclerView()
+        setupViewModel()
+    }
+
+    private fun setupRecyclerView() {
         recPost = findViewById<RecyclerView>(R.id.recPosts)
-        adapterPost = PostAdapter(onPostClicked ={ post->
+        val layoutManager = LinearLayoutManager(this)
+        recPost.layoutManager = layoutManager
+        adapterPost = PostAdapter(onPostClicked = { post ->
 
         })
         recPost.adapter = adapterPost
-        val id = intent.getIntExtra("USER_ID", -1)
+        recPost.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+
+                // Only check if scrolling down
+                if (dy > 0) {
+                    val visibleItemCount = layoutManager.childCount
+                    val totalItemCount = layoutManager.itemCount
+                    val pastVisibleItems = layoutManager.findFirstVisibleItemPosition()
+
+                    if (!isNetworkLoading) {
+                        // Trigger fetching when the user reaches the end of the current threshold
+                        if ((visibleItemCount + pastVisibleItems) >= totalItemCount) {
+                            postViewModel.loadNextPage()
+                        }
+                    }
+                }
+            }
+        })
+    }
+
+    private fun setupViewModel() {
+        id = intent.getIntExtra("USER_ID", -1)
         val api = RetrofitClient.api
         val repository = UsersListRepository(api)
         val factory = PostViewModelFactory(repository, id)
-
         postViewModel =
             ViewModelProvider(this@PostViewActivity, factory).get(PostViewModel::class.java)
         getData()
@@ -66,15 +98,17 @@ class PostViewActivity : AppCompatActivity() {
         when (state) {
             is PostViewState.Loading -> {
                 Log.d("HTTP==", "Loading")
+                isNetworkLoading = true
             }
 
             is PostViewState.Success -> {
-                state.userDTOS.toString()
+                isNetworkLoading = false
                 adapterPost.submitList(state.userDTOS)
                 Log.d("HTTP==", "Success = ${state.userDTOS.toString()}")
             }
 
             is PostViewState.Error -> {
+                isNetworkLoading = false
                 Log.d("HTTP==", "Error")
             }
         }

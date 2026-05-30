@@ -19,8 +19,14 @@ class UsersListRepository(private val api: ApiInterface) {
     suspend fun getAllUsers(): List<UserDTO> {
         return api.getAllUsers()
     }
-
+// get all post at once
     suspend fun getUserPost(id: Int): List<PostDTO> {
         return api.getUserPost(id)
+    }
+
+    //post pagination
+    suspend fun getUserPostPaged(id: Int, page: Int, limit: Int): List<PostDTO> {
+        val posts = api.getUserPostPaged(id, page, limit)
+        return posts
     }
 }

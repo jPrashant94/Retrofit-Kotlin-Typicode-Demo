@@ -43,13 +43,15 @@ class MainActivity : AppCompatActivity() {
 
         recUser = findViewById<RecyclerView>(R.id.recUsers)
 
-
-
-        adapterUser = UserAdapter { user ->
+        adapterUser = UserAdapter(onUserClicked = { user ->
             val intent = Intent(this@MainActivity, PostViewActivity::class.java)
             intent.putExtra("USER_ID", user.id)
             startActivity(intent)
-        }
+        })
+
+//        adapterUser = UserAdapter {
+//
+//        }
         recUser.adapter = adapterUser
 
         val api = RetrofitClient.api
