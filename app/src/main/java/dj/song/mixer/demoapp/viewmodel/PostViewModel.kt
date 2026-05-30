@@ -2,11 +2,17 @@ package dj.song.mixer.demoapp.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import dj.song.mixer.demoapp.model.PostDTO
+import dj.song.mixer.demoapp.repository.PostsPagingSource
 import dj.song.mixer.demoapp.state.UsersState
 import dj.song.mixer.demoapp.repository.UsersListRepository
 import dj.song.mixer.demoapp.state.PostItemSpinnerState
 import dj.song.mixer.demoapp.state.PostViewState
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -24,8 +30,19 @@ class PostViewModel(private val repository: UsersListRepository, val id: Int) : 
 
     private val allLoadedPosts = mutableListOf<PostDTO>()
 
+    val postsFlow: Flow<PagingData<PostDTO>> = Pager(
+        config = PagingConfig(
+            pageSize = 10, // How many items to load at once
+            prefetchDistance = 2, // Fetch next page when 2 items from the bottom
+            enablePlaceholders = false
+        ),
+        pagingSourceFactory = {
+            PostsPagingSource(repository, id)
+        }
+    ).flow.cachedIn(viewModelScope)
+
     init {
-        loadNextPage()
+       // loadNextPage()
       //  fetchUsers()
     }
 

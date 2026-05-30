@@ -4,13 +4,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import dj.song.mixer.demoapp.R
 import dj.song.mixer.demoapp.model.PostDTO
 
-class PostAdapter(private val onPostClicked : (PostDTO) -> Unit) : ListAdapter<PostDTO, PostAdapter.PostViewHolder>(PostDiffCallback()) {
+class PostAdapter(private val onPostClicked : (PostDTO) -> Unit) : PagingDataAdapter<PostDTO, PostAdapter.PostViewHolder>(PostDiffCallback()) {
 
     class PostViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val titleText: TextView = view.findViewById(R.id.txtTitle)
@@ -35,11 +36,14 @@ class PostAdapter(private val onPostClicked : (PostDTO) -> Unit) : ListAdapter<P
     override fun onBindViewHolder(holder: PostAdapter.PostViewHolder, position: Int) {
         // getItem(position) is built into ListAdapter!
         val post = getItem(position)
-        holder.bind(post)
+        if(post != null){
+            holder.bind(post)
 
-        holder.itemView.setOnClickListener {
-            onPostClicked(post)
+            holder.itemView.setOnClickListener {
+                onPostClicked(post)
+            }
         }
+
     }
 }
 

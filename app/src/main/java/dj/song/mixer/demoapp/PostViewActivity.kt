@@ -22,13 +22,14 @@ import dj.song.mixer.demoapp.state.PostViewState
 import dj.song.mixer.demoapp.state.UsersState
 import dj.song.mixer.demoapp.viewmodel.PostViewModel
 import dj.song.mixer.demoapp.viewmodel.UsersViewModel
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 class PostViewActivity : AppCompatActivity() {
 
     lateinit var postViewModel: PostViewModel
     lateinit var recPost: RecyclerView
-    lateinit var adapterPost: PostAdapterPagination
+    lateinit var adapterPost: PostAdapter
 
     private var isNetworkLoading = false
     var id = 1
@@ -50,7 +51,7 @@ class PostViewActivity : AppCompatActivity() {
         recPost = findViewById<RecyclerView>(R.id.recPosts)
         val layoutManager = LinearLayoutManager(this)
         recPost.layoutManager = layoutManager
-        adapterPost = PostAdapterPagination(onPostClicked = { post ->
+        adapterPost = PostAdapter(onPostClicked = { post ->
 
         })
         recPost.adapter = adapterPost
@@ -88,30 +89,34 @@ class PostViewActivity : AppCompatActivity() {
     private fun getData() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                postViewModel.uiState.collect { state ->
-                    handleUIState(state)
+//                postViewModel.uiState.collect { state ->
+//                    handleUIState(state)
+//                }
+
+                postViewModel.postsFlow.collectLatest { pagingData ->
+                    adapterPost.submitData(pagingData)
                 }
             }
         }
     }
 
-    private fun handleUIState(state: PostViewState) {
-        when (state) {
-            is PostViewState.Loading -> {
-                Log.d("HTTP==", "Loading")
-                isNetworkLoading = true
-            }
-
-            is PostViewState.Success -> {
-                isNetworkLoading = false
-                adapterPost.submitList(state.userDTOS)
-                Log.d("HTTP==", "Success = ${state.userDTOS.toString()}")
-            }
-
-            is PostViewState.Error -> {
-                isNetworkLoading = false
-                Log.d("HTTP==", "Error")
-            }
-        }
-    }
+//    private fun handleUIState(state: PostViewState) {
+//        when (state) {
+//            is PostViewState.Loading -> {
+//                Log.d("HTTP==", "Loading")
+//                isNetworkLoading = true
+//            }
+//
+//            is PostViewState.Success -> {
+//                isNetworkLoading = false
+//                adapterPost.submitList(state.userDTOS)
+//                Log.d("HTTP==", "Success = ${state.userDTOS.toString()}")
+//            }
+//
+//            is PostViewState.Error -> {
+//                isNetworkLoading = false
+//                Log.d("HTTP==", "Error")
+//            }
+//        }
+//    }
 }
