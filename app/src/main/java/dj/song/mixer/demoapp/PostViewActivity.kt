@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import dj.song.mixer.demoapp.adapter.PostAdapter
 import dj.song.mixer.demoapp.adapter.PostAdapterPagination
+import dj.song.mixer.demoapp.adapter.PostsLoadStateAdapter
 import dj.song.mixer.demoapp.factory.PostViewModelFactory
 import dj.song.mixer.demoapp.factory.UsersViewModelFactory
 import dj.song.mixer.demoapp.repository.UsersListRepository
@@ -54,26 +55,32 @@ class PostViewActivity : AppCompatActivity() {
         adapterPost = PostAdapter(onPostClicked = { post ->
 
         })
-        recPost.adapter = adapterPost
-        recPost.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                super.onScrolled(recyclerView, dx, dy)
 
-                // Only check if scrolling down
-                if (dy > 0) {
-                    val visibleItemCount = layoutManager.childCount
-                    val totalItemCount = layoutManager.itemCount
-                    val pastVisibleItems = layoutManager.findFirstVisibleItemPosition()
+        // 2. Chain the footer adapter using withLoadStateFooter
+        // postsAdapter.retry() is a built-in Paging 3 function that safely retries the failed page load!
+        val footerAdapter = PostsLoadStateAdapter { adapterPost.retry() }
 
-                    if (!isNetworkLoading) {
-                        // Trigger fetching when the user reaches the end of the current threshold
-                        if ((visibleItemCount + pastVisibleItems) >= totalItemCount) {
-                            postViewModel.loadNextPage()
-                        }
-                    }
-                }
-            }
-        })
+
+        recPost.adapter = adapterPost.withLoadStateFooter(footer = footerAdapter)
+//        recPost.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+//            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+//                super.onScrolled(recyclerView, dx, dy)
+//
+//                // Only check if scrolling down
+//                if (dy > 0) {
+//                    val visibleItemCount = layoutManager.childCount
+//                    val totalItemCount = layoutManager.itemCount
+//                    val pastVisibleItems = layoutManager.findFirstVisibleItemPosition()
+//
+//                    if (!isNetworkLoading) {
+//                        // Trigger fetching when the user reaches the end of the current threshold
+//                        if ((visibleItemCount + pastVisibleItems) >= totalItemCount) {
+//                            postViewModel.loadNextPage()
+//                        }
+//                    }
+//                }
+//            }
+//        })
     }
 
     private fun setupViewModel() {
