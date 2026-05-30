@@ -38,7 +38,9 @@ class PostViewActivity : AppCompatActivity() {
             insets
         }
         recPost = findViewById<RecyclerView>(R.id.recPosts)
-        adapterPost = PostAdapter()
+        adapterPost = PostAdapter(onPostClicked ={ post->
+
+        })
         recPost.adapter = adapterPost
         val id = intent.getIntExtra("USER_ID", -1)
         val api = RetrofitClient.api

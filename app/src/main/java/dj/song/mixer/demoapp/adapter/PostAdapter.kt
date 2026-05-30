@@ -10,7 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import dj.song.mixer.demoapp.R
 import dj.song.mixer.demoapp.model.PostDTO
 
-class PostAdapter : ListAdapter<PostDTO, PostAdapter.PostViewHolder>(PostDiffCallback()) {
+class PostAdapter(private val onPostClicked : (PostDTO) -> Unit) : ListAdapter<PostDTO, PostAdapter.PostViewHolder>(PostDiffCallback()) {
 
     class PostViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val titleText: TextView = view.findViewById(R.id.txtTitle)
@@ -20,6 +20,8 @@ class PostAdapter : ListAdapter<PostDTO, PostAdapter.PostViewHolder>(PostDiffCal
             titleText.text = post.title
             bodyText.text = post.body
         }
+
+
     }
 
     override fun onCreateViewHolder(
@@ -35,6 +37,10 @@ class PostAdapter : ListAdapter<PostDTO, PostAdapter.PostViewHolder>(PostDiffCal
         // getItem(position) is built into ListAdapter!
         val post = getItem(position)
         holder.bind(post)
+
+        holder.itemView.setOnClickListener {
+            onPostClicked(post)
+        }
     }
 }
 

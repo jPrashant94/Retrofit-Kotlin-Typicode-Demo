@@ -42,6 +42,9 @@ class MainActivity : AppCompatActivity() {
         }
 
         recUser = findViewById<RecyclerView>(R.id.recUsers)
+
+
+
         adapterUser = UserAdapter { user ->
             val intent = Intent(this@MainActivity, PostViewActivity::class.java)
             intent.putExtra("USER_ID", user.id)
